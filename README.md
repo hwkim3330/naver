@@ -1,138 +1,171 @@
-# HyperCLOVAX Neural AGI
+# HyperCLOVAX-SEED-Omni-8B 신경망 구조 분석
 
-**진짜 신경망 레벨 AGI** - 프롬프트 엔지니어링이 아닌 실제 신경망 내부에 접근하는 AGI 시스템
+**Naver HyperCLOVA X SEED 8B Omni** - 한국어 최초 Any-to-Any 멀티모달 모델
 
-## HyperCLOVAX OMNI 구조
+## 정확한 신경망 구조
 
 ```
-┌──────────────────────────────────────────────────────────────────┐
-│                   HyperCLOVAX OMNI 8B Architecture               │
-├──────────────────────────────────────────────────────────────────┤
-│                                                                   │
-│   ┌──────────┐   ┌──────────┐   ┌──────────┐                    │
-│   │ Vision   │   │  Audio   │   │  Video   │                    │
-│   │ Qwen2.5  │   │  Qwen2   │   │  Frames  │                    │
-│   │   VL     │   │  Audio   │   │          │                    │
-│   │ (32 Layers)  │ (32 Layers)  │          │                    │
-│   └────┬─────┘   └────┬─────┘   └────┬─────┘                    │
-│        │              │              │                           │
-│        └──────────────┼──────────────┘                           │
-│                       ▼                                          │
-│              ┌────────────────┐                                  │
-│              │   MambaMIA     │  ← Mamba2 SSM based              │
-│              │  (Compressor)  │    Video/Audio Compression       │
-│              └───────┬────────┘                                  │
-│                      ▼                                           │
-│              ┌────────────────┐                                  │
-│              │   Projector    │                                  │
-│              │    (Linear)    │                                  │
-│              └───────┬────────┘                                  │
-│                      ▼                                           │
-│   ┌──────────────────────────────────────────────┐              │
-│   │           LLM (Llama-like)                   │              │
-│   │    36 layers, 4096 hidden, 32 heads          │              │
-│   │    vocab: 200,704 tokens                     │              │
-│   └──────────────────┬───────────────────────────┘              │
-│                      │                                           │
-│        ┌─────────────┴─────────────┐                            │
-│        ▼                           ▼                             │
-│   ┌─────────┐               ┌───────────┐                       │
-│   │ TA-Tok  │               │ CosyVoice │                       │
-│   │ (Image) │               │  (Audio)  │                       │
-│   │ Gen     │               │  Gen      │                       │
-│   └─────────┘               └───────────┘                       │
-│                                                                   │
-└──────────────────────────────────────────────────────────────────┘
+총 파라미터: 42.97 GB (약 10.7B params @ fp32)
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    HyperCLOVAX-SEED-Omni-8B Architecture                    │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  ┌─────────────────────────────────────────────────────────────────────┐    │
+│  │                        INPUT ENCODERS                                │    │
+│  │                                                                      │    │
+│  │  ┌────────────────────┐    ┌────────────────────┐                   │    │
+│  │  │    Vision Model    │    │    Audio Model     │                   │    │
+│  │  │   (Qwen2.5-VL)     │    │  (Qwen2-Audio)     │                   │    │
+│  │  │                    │    │                    │                   │    │
+│  │  │  • 32 Layers       │    │  • 32 Layers       │                   │    │
+│  │  │  • 390 weights     │    │  • 487 weights     │                   │    │
+│  │  │  • 1280 hidden     │    │  • 1280 d_model    │                   │    │
+│  │  │  • 16 heads        │    │  • 20 heads        │                   │    │
+│  │  │  • patch=14        │    │  • 128 mel bins    │                   │    │
+│  │  └─────────┬──────────┘    └─────────┬──────────┘                   │    │
+│  │            │                         │                              │    │
+│  │            ▼                         ▼                              │    │
+│  │  ┌────────────────────┐    ┌────────────────────┐                   │    │
+│  │  │   MM Projector     │    │  Audio Projector   │                   │    │
+│  │  │   (Linear)         │    │   (MLP)            │                   │    │
+│  │  │   2 weights        │    │   4 weights        │                   │    │
+│  │  └─────────┬──────────┘    └─────────┬──────────┘                   │    │
+│  │            │                         │                              │    │
+│  │            └────────────┬────────────┘                              │    │
+│  │                         │                                           │    │
+│  │                         ▼                                           │    │
+│  │            ┌────────────────────────────┐                           │    │
+│  │            │  Video-Audio Compressor    │  ◀── MambaMIA (Mamba2)    │    │
+│  │            │  • 1 Layer (21 weights)    │      SSM 기반 압축        │    │
+│  │            │  • 긴 비디오/오디오 압축   │                           │    │
+│  │            └────────────┬───────────────┘                           │    │
+│  │                         │                                           │    │
+│  └─────────────────────────┼───────────────────────────────────────────┘    │
+│                            │                                                 │
+│                            ▼                                                 │
+│  ┌─────────────────────────────────────────────────────────────────────┐    │
+│  │                      LANGUAGE MODEL (LLM)                            │    │
+│  │                                                                      │    │
+│  │  • Architecture: Llama-like Transformer                             │    │
+│  │  • 36 Layers                                                        │    │
+│  │  • 327 weights                                                      │    │
+│  │  • Hidden: 4096                                                     │    │
+│  │  • Heads: 32 (KV Heads: 8 - GQA)                                   │    │
+│  │  • FFN: 12288 (intermediate)                                       │    │
+│  │  • Vocab: 200,704 tokens                                           │    │
+│  │  • Context: 32K (max_position_embeddings: 8192, rope_theta: 5M)    │    │
+│  │  • Activation: SiLU                                                │    │
+│  │                                                                      │    │
+│  └─────────────────────────┬───────────────────────────────────────────┘    │
+│                            │                                                 │
+│                            ▼                                                 │
+│  ┌─────────────────────────────────────────────────────────────────────┐    │
+│  │                      OUTPUT DECODERS                                 │    │
+│  │                                                                      │    │
+│  │  ┌────────────────────────┐    ┌────────────────────────┐           │    │
+│  │  │  Discrete Vision       │    │  Discrete Audio        │           │    │
+│  │  │  (TA-Tok)              │    │  (CosyVoice2)          │           │    │
+│  │  │                        │    │                        │           │    │
+│  │  │  • 27 Layers           │    │  • 6 Layers            │           │    │
+│  │  │  • 527 weights         │    │  • 102 weights         │           │    │
+│  │  │  • Text-to-Image       │    │  • Text-to-Speech      │           │    │
+│  │  │  • Image Editing       │    │  • Voice Cloning       │           │    │
+│  │  └────────────────────────┘    └────────────────────────┘           │    │
+│  │                                                                      │    │
+│  └──────────────────────────────────────────────────────────────────────┘    │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
 ```
 
-## 핵심 기능
+## 컴포넌트별 상세
 
-### 1. 신경망 내부 접근
-- **Hidden States 모니터링**: 각 레이어의 활성화 값 실시간 분석
-- **Attention 패턴 분석**: 어텐션 엔트로피로 집중도 측정
-- **MambaMIA SSM States**: Mamba2 상태 공간 모델의 내부 상태 활용
+| Component | Weights | Layers | 기반 아키텍처 | 역할 |
+|-----------|---------|--------|--------------|------|
+| `vision_model` | 390 | 32 | Qwen2.5-VL ViT | 이미지/비디오 인코딩 |
+| `audio_model` | 487 | 32 | Qwen2-Audio Encoder | 오디오/음성 인코딩 |
+| `video_audio_compressor` | 21 | 1 | MambaMIA (Mamba2 SSM) | 긴 시퀀스 압축 |
+| `mm_projector` | 2 | - | Linear | Vision→LLM 투영 |
+| `audio_projector` | 4 | - | MLP | Audio→LLM 투영 |
+| `language_model` | 327 | 36 | Llama-like | 핵심 언어 모델 |
+| `discrete_vision_model` | 527 | 27 | TA-Tok | 이미지 생성/편집 |
+| `discrete_audio_model` | 102 | 6 | CosyVoice2 | 음성 합성 |
 
-### 2. 진짜 자기 인식
+## 특수 토큰 ID
+
 ```python
-# 일반적인 "가짜" 자기 인식
-response = model.generate("너의 상태를 설명해")  # 그냥 텍스트 생성
+# 입력 토큰
+IMAGE_PAD = 128062      # <|IMAGE_PAD|>
+VIDEO_PAD = 128063      # <|VIDEO_PAD|>
+AUDIO_PAD = 128071      # <|AUDIO_PAD|>
+VIDEO_AUDIO_PAD = 128070  # <|VIDEO_AUDIO_PAD|>
 
-# Neural AGI의 진짜 자기 인식
-neural_state = introspection.analyze_activations()
-# → 실제 뉴런 활성화 기반 상태:
-#   - confidence: 0.73 (활성화 패턴 기반)
-#   - focus_level: 0.81 (어텐션 엔트로피 기반)
-#   - uncertainty: 0.15 (활성화 분산 기반)
+# 출력 (Discrete) 토큰
+DISCRETE_IMAGE_START = 128069   # 이미지 생성 시작
+DISCRETE_IMAGE_UNIT_0 = 135168  # 이미지 토큰 시작
+DISCRETE_AUDIO_START = 128074   # 오디오 생성 시작
+DISCRETE_AUDIO_UNIT_0 = 128606  # 오디오 토큰 시작
 ```
 
-### 3. 신경망 메모리
-- **Embedding Space 기반 저장**: 텍스트를 모델의 실제 embedding으로 인코딩
-- **Cosine Similarity 검색**: 의미적으로 유사한 기억 검색
-- **영구 저장**: 임베딩 텐서와 텍스트 함께 저장
+## 데이터 플로우
 
-### 4. 재귀적 자기 개선 (LoRA)
-- 모델 구조 분석
-- 약점 기반 LoRA 타겟 제안
-- 동적 어댑터 적용 가능
-
-## 설치
-
-```bash
-# 의존성
-pip install torch transformers einops timm
-
-# HyperCLOVAX 모델 다운로드 (46GB)
-# huggingface-cli download naver-hyperclovax/HyperCLOVAX-SEED-Omni-8B
+### 1. 이미지 이해 (Image → Text)
+```
+Image → Vision Model (Qwen2.5-VL) → MM Projector → LLM → Text
 ```
 
-## 사용법
-
-```bash
-# 대화 모드
-python neural_agi.py --mode chat
-
-# 모델 분석
-python neural_agi.py --mode analyze
-
-# 구조 테스트 (모델 없이)
-python neural_agi.py --mode test --no-model
+### 2. 비디오 이해 (Video + Audio → Text)
+```
+Video Frames ─┐
+              ├→ Video-Audio Compressor (MambaMIA) → LLM → Text
+Audio ────────┘
 ```
 
-### 명령어
-- `/introspect` - 신경망 상태 기반 자기 성찰
-- `/analyze` - 모델 구조 분석 (파라미터 수, 모듈 등)
-- `/memory <query>` - 신경망 메모리 검색
-- `exit` - 종료
-
-## 기술 스택
-
-- **Base Model**: HyperCLOVAX-SEED-Omni-8B (Naver)
-- **Vision**: Qwen2.5-VL ViT (32층, 1280d)
-- **Audio**: Qwen2-Audio Encoder (32층, 1280d)
-- **Compressor**: MambaMIA (Mamba2 SSM)
-- **LLM**: Llama-like (36층, 4096d, 8B params)
-- **Output**: CosyVoice2 (음성), TA-Tok (이미지)
-
-## 프로젝트 구조
-
+### 3. 이미지 생성 (Text → Image)
 ```
-HyperCLOVAX-AGI/
-├── neural_agi.py       # 메인 AGI 시스템
-├── README.md           # 이 파일
-├── requirements.txt    # 의존성
-└── data/               # 상태 저장
-    ├── neural_state.json
-    └── neural_memory/
-        ├── memories.json
-        └── embeddings.pt
+Text → LLM → Discrete Vision Tokens → TA-Tok Decoder → Image
 ```
+
+### 4. 음성 합성 (Text → Audio)
+```
+Text → LLM → Discrete Audio Tokens → CosyVoice2 Decoder → Audio
+```
+
+## 핵심 혁신
+
+### MambaMIA (Video-Audio Compressor)
+- **Mamba2 SSM** 기반 시퀀스 압축
+- 긴 비디오/오디오의 토큰 폭발 방지
+- 시간 1시간 비디오도 32K 컨텍스트 내 처리 가능
+
+### TA-Tok (Text-Aligned Tokenizer)
+- 텍스트와 정렬된 이미지 토큰화
+- Discrete image tokens로 이미지 생성
+- 편집도 동일 메커니즘으로 가능
+
+### CosyVoice2
+- 음성 클로닝 지원
+- Discrete audio tokens 사용
+- 한국어 TTS 최적화
+
+## 하드웨어 요구사항
+
+| 구성요소 | VRAM |
+|----------|------|
+| Vision Encoder | ~8 GB |
+| Audio Encoder | ~4 GB |
+| LLM (8B) | ~16 GB |
+| Vision Decoder | ~16 GB |
+| Audio Decoder | ~4 GB |
+| **합계** | **~48 GB** (3-4x A100) |
+
+## 참고 자료
+
+- [HuggingFace Model](https://huggingface.co/naver-hyperclovax/HyperCLOVAX-SEED-Omni-8B)
+- [OmniServe](https://github.com/NAVER-Cloud-HyperCLOVA-X/OmniServe)
+- [MambaMIA](https://github.com/naver-ai/mambamia)
+- [Qwen2.5-VL](https://github.com/QwenLM/Qwen2.5-VL)
 
 ## 라이선스
 
-MIT License
-
-## 참고
-
-- [HyperCLOVAX-SEED-Omni-8B](https://huggingface.co/naver-hyperclovax/HyperCLOVAX-SEED-Omni-8B)
-- [MambaMIA](https://github.com/naver-ai/mambamia)
-- [Qwen2.5-VL](https://github.com/QwenLM/Qwen2.5-VL)
+HyperCLOVA X SEED 8B Omni Model License Agreement
