@@ -255,6 +255,45 @@ model/
 - [Qwen2.5-VL](https://github.com/QwenLM/Qwen2.5-VL)
 - [Qwen2-Audio](https://github.com/QwenLM/Qwen2-Audio)
 
+## 최적화된 AI 실행
+
+### 빠른 시작
+
+```bash
+# 의존성 설치
+pip install -r requirements.txt
+
+# 실행
+./run.sh
+```
+
+### 하드웨어별 최적화
+
+| GPU | VRAM | 설정 | 성능 |
+|-----|------|------|------|
+| GTX 1050 Ti | 4GB | INT4 + CPU Offload | 느림 |
+| RTX 3060 | 12GB | INT4 + Hybrid | 중간 |
+| RTX 3090 | 24GB | INT4 | 빠름 |
+| A100 40GB | 40GB | FP16 | 최고 |
+
+### 파일 구조
+
+```
+├── optimized_ai.py          # 최적화된 모델 로더
+├── multimodal_pipeline.py   # 멀티모달 추론 파이프라인
+├── encoder_extension.md     # 인코더 확장 가이드
+├── requirements.txt         # 의존성
+└── run.sh                   # 실행 스크립트
+```
+
+### 주요 기능
+
+- **자동 하드웨어 감지**: GPU VRAM에 맞게 자동 최적화
+- **INT4/INT8 양자화**: 42GB → 12GB 메모리 절약
+- **CPU-GPU 하이브리드**: 인코더는 CPU, LLM은 GPU
+- **동적 레이어 관리**: 필요한 레이어만 GPU 로드
+- **멀티모달 지원**: 이미지, 오디오, 비디오 처리
+
 ## 라이선스
 
 HyperCLOVA X SEED 8B Omni Model License Agreement
