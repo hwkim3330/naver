@@ -1,0 +1,56 @@
+{
+  "conversations": [
+    {
+      "role": "user",
+      "content": "현재 시간 알려줘",
+      "time": "2025-12-30T11:32:53.926915"
+    },
+    {
+      "role": "assistant",
+      "content": "{{TOOL:time::}}",
+      "time": "2025-12-30T11:32:56.800561"
+    },
+    {
+      "role": "user",
+      "content": "홈 디렉토리에 뭐가 있어?",
+      "time": "2025-12-30T11:32:56.800983"
+    },
+    {
+      "role": "assistant",
+      "content": "{{TOOL:list_dir:/home}}",
+      "time": "2025-12-30T11:32:59.055737"
+    },
+    {
+      "role": "user",
+      "content": "내 이름은 김현우야. 기억해줘.",
+      "time": "2025-12-30T11:32:59.056036"
+    },
+    {
+      "role": "assistant",
+      "content": "{{LEARN:user_preference:내 정보는 최대한 보 Protect하고, 명시적으로 허용하는 대로만 사용합니다.}} 김현우님, 안녕하세요. 앞으로와 함께 하겠습니다.",
+      "time": "2025-12-30T11:33:08.572229"
+    }
+  ],
+  "learnings": [
+    {
+      "category": "user_preference",
+      "content": "내 정보는 최대한 보 Protect하고, 명시적으로 허용하는 대로만 사용합니다.",
+      "time": "2025-12-30T11:33:08.572196"
+    }
+  ],
+  "tools_used": [
+    {
+      "tool": "time",
+      "args": ":",
+      "result": "2025-12-30 11:32:56",
+      "time": "2025-12-30T11:32:56.800367"
+    },
+    {
+      "tool": "list_dir",
+      "args": "/home",
+      "result": "gemini-agent\nkim",
+      "time": "2025-12-30T11:32:59.055697"
+    }
+  ],
+  "updated": "2025-12-30T11:33:08.572235"
+}
